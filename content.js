@@ -2,8 +2,7 @@
 // after the popup closes. All requests go only to https://discord.com/api.
 
 (() => {
-  if (window.__discordCleanerLoaded) return;
-  window.__discordCleanerLoaded = true;
+  const VERSION = chrome.runtime.getManifest().version;
 
   const API = 'https://discord.com/api/v9';
 
@@ -384,12 +383,14 @@
   async function handle(msg) {
     switch (msg && msg.type) {
       case 'ping':
-        return { ok: true };
+        return { ok: true, version: VERSION, lists: Object.keys(LOADERS) };
       case 'status':
         return snapshot();
       case 'load':
         if (state.running) throw new Error('Wait for the current job to finish first.');
-        if (!LOADERS[msg.what]) throw new Error('Unknown list.');
+        if (!LOADERS[msg.what]) {
+          throw new Error('The Discord tab is running an older version. Reload the Discord tab (F5) and try again.');
+        }
         return { items: await LOADERS[msg.what]() };
       case 'start':
         startJob(msg);

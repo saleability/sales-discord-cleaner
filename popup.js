@@ -364,7 +364,15 @@ async function init() {
   }
 
   try {
-    await send({ type: 'ping' });
+    const pong = await send({ type: 'ping' });
+    const expected = chrome.runtime.getManifest().version;
+    const missing = Object.keys(lists).filter((k) => !(pong.lists || []).includes(k));
+    if (pong.version !== expected || missing.length) {
+      throw new Error(
+        'Your Discord tab is still running an older version of this extension. ' +
+          'Reload the Discord tab (F5), then reopen this menu.'
+      );
+    }
   } catch (e) {
     banner(e.message);
     tabId = null;

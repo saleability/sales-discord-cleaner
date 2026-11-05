@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Sales Discord Cleaner",
-  "version": "1.0.0",
-  "description": "Bulk-remove friends, leave servers, and delete your own DM messages. Runs locally; your token never leaves discord.com.",
+  "version": "1.0.1",
+  "description": "Bulk-remove friends, leave servers, delete your own DM messages and deauthorize apps. Runs locally; your token never leaves discord.com.",
   "permissions": ["webRequest", "storage"],
   "host_permissions": ["https://discord.com/*"],
   "background": {
