@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Sales Discord Cleaner</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="bg" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="grid-lines"></div>
+  </div>
+
+  <header class="top">
+    <h1><span class="logo">&#10022;</span> Sales Discord Cleaner</h1>
+    <button id="join" class="btn join" title="Opens discord.gg/rMkAf7tW9e in a new tab">Join Discord</button>
+  </header>
+  <div id="banner" class="banner hidden"></div>
+
+  <main class="layout">
+    <div class="col">
+      <nav class="tabs">
+        <button data-tab="friends" class="tab active">Friends</button>
+        <button data-tab="servers" class="tab">Servers</button>
+        <button data-tab="dms" class="tab">DMs</button>
+        <button data-tab="apps" class="tab">Authorized Apps</button>
+      </nav>
+
+      <section id="picker" class="card">
+        <div class="row">
+          <button id="load" class="btn">Load list</button>
+          <input id="filter" type="search" placeholder="Filter&hellip;" />
+        </div>
+        <div class="row small">
+          <button id="selAll" class="link">Select all shown</button>
+          <button id="selNone" class="link">Select none</button>
+          <span id="selCount" class="muted"></span>
+        </div>
+        <ul id="list" class="list"><li class="empty">Click &ldquo;Load list&rdquo;.</li></ul>
+      </section>
+
+      <section id="dmOpts" class="card opts hidden">
+        <label><input type="checkbox" id="optDelete" checked /> Delete my messages in these DMs</label>
+        <label><input type="checkbox" id="optClose" /> Close the DM afterwards (leaves group DMs)</label>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="card opts">
+        <div class="row">
+          <label for="speed">Speed</label>
+          <select id="speed">
+            <option value="safe">Safe (slowest, recommended)</option>
+            <option value="normal">Normal</option>
+            <option value="fast">Fast (higher ban risk)</option>
+            <option value="custom">Custom&hellip;</option>
+          </select>
+        </div>
+        <div id="speedInfo" class="muted small"></div>
+        <div id="custom" class="fields hidden">
+          <label>Action delay (s)<input id="cDelay" type="number" min="0.5" step="0.1" /></label>
+          <label>Message delay (s)<input id="cMsgDelay" type="number" min="0.5" step="0.1" /></label>
+          <label>Randomness (%)<input id="cJitter" type="number" min="0" max="90" step="5" /></label>
+          <label>Break every N (0 = off)<input id="cBreakEvery" type="number" min="0" step="1" /></label>
+          <label>Break length (s)<input id="cBreakSec" type="number" min="0" step="5" /></label>
+        </div>
+        <label class="dry"><input type="checkbox" id="dryRun" checked /> Dry run (preview only, changes nothing)</label>
+      </section>
+
+      <section class="run">
+        <button id="start" class="btn primary" disabled>Start</button>
+        <button id="pause" class="btn" disabled>Pause</button>
+        <button id="stop" class="btn danger" disabled>Stop</button>
+      </section>
+
+      <section id="status" class="card status">
+        <div class="bar"><div id="barFill"></div></div>
+        <div id="statusText" class="small"></div>
+        <div id="stats" class="small muted"></div>
+        <ol id="log" class="log"></ol>
+      </section>
+    </div>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

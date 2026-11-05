@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Sales Discord Cleaner",
+  "version": "1.0.0",
+  "description": "Bulk-remove friends, leave servers, and delete your own DM messages. Runs locally; your token never leaves discord.com.",
+  "permissions": ["webRequest", "storage"],
+  "host_permissions": ["https://discord.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://discord.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Sales Discord Cleaner",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  }
+}
