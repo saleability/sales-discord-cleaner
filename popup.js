@@ -39,17 +39,42 @@ async function findDiscordTab() {
   return (match || tabs[0]).id;
 }
 
-async function send(msg) {
+const RELOAD_HELP =
+  'Go to chrome://extensions and click ↻ on Sales Discord Cleaner, then reload your Discord tab (F5) and try again.';
+
+let connected = false;
+
+async function rawSend(msg) {
   try {
     const r = await chrome.tabs.sendMessage(tabId, msg);
     if (r && r.error) throw new Error(r.error);
     return r;
   } catch (e) {
     if (/Receiving end does not exist|Could not establish connection/i.test(e.message)) {
-      throw new Error('Not connected to the Discord tab yet. Reload the Discord tab (F5), then reopen this menu.');
+      connected = false;
+      throw new Error('Not connected to the Discord tab. ' + RELOAD_HELP);
     }
     throw e;
   }
+}
+
+// Finds the Discord tab and checks it's running the same version as this menu.
+async function connect() {
+  connected = false;
+  tabId = await findDiscordTab();
+  if (tabId == null) throw new Error('Open https://discord.com/app in a tab and log in, then try again.');
+  const pong = await rawSend({ type: 'ping' });
+  const expected = chrome.runtime.getManifest().version;
+  const missing = Object.keys(lists).filter((k) => !((pong && pong.lists) || []).includes(k));
+  if (!pong || pong.version !== expected || missing.length) {
+    throw new Error('Your Discord tab is running an older version of this extension. ' + RELOAD_HELP);
+  }
+  connected = true;
+}
+
+async function send(msg) {
+  if (!connected) await connect();
+  return rawSend(msg);
 }
 
 function banner(text) {
@@ -186,7 +211,7 @@ function updateCounts() {
   const L = lists[active];
   const n = L.selected.size;
   $('#selCount').textContent = L.loaded ? `${n} of ${L.items.length} selected` : '';
-  $('#start').disabled = running || n === 0 || tabId == null;
+  $('#start').disabled = running || n === 0;
   if (confirmTimer) return; // keep the "click again to confirm" text while it's pending
   const v = VERBS[active];
   const dry = $('#dryRun').checked;
@@ -350,32 +375,23 @@ async function init() {
     })
   );
   $('#start').addEventListener('click', start);
-  $('#pause').addEventListener('click', async () => renderStatus(await send({ type: 'pause' })));
-  $('#stop').addEventListener('click', async () => renderStatus(await send({ type: 'stop' })));
+  const control = (type) => async () => {
+    try {
+      renderStatus(await send({ type }));
+    } catch (e) {
+      banner(e.message);
+    }
+  };
+  $('#pause').addEventListener('click', control('pause'));
+  $('#stop').addEventListener('click', control('stop'));
 
   await loadSettings();
   renderList();
 
-  tabId = await findDiscordTab();
-  if (tabId == null) {
-    banner('Open https://discord.com/app in a tab and log in, then reopen this menu.');
-    updateCounts();
-    return;
-  }
-
   try {
-    const pong = await send({ type: 'ping' });
-    const expected = chrome.runtime.getManifest().version;
-    const missing = Object.keys(lists).filter((k) => !(pong.lists || []).includes(k));
-    if (pong.version !== expected || missing.length) {
-      throw new Error(
-        'Your Discord tab is still running an older version of this extension. ' +
-          'Reload the Discord tab (F5), then reopen this menu.'
-      );
-    }
+    await connect();
   } catch (e) {
     banner(e.message);
-    tabId = null;
     updateCounts();
     return;
   }
